@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>Typing Plane Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@500;600;700;800&display=swap');
+    :root {
+      color-scheme: light dark;
+      --ink:#12202a; --muted:#4e6470; --panel:#ffffff; --panel-2:#edf4f6;
+      --line:rgba(18,32,42,.14); --accent:#ff5b35; --accent-ink:#fff;
+      --sky-top:#79d8f4; --sky-bottom:#e9fbff; --horizon:#c7e58b; --ground:#89b45b;
+      --good:#087e68; --bad:#cf3f38; --shadow:0 18px 60px rgba(18,53,69,.17);
+      --scene-text:#102d3a; --cloud:rgba(255,255,255,.82); --runway:#46565e;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink:#edf8fb; --muted:#a8bec7; --panel:#111d25; --panel-2:#192a34;
+        --line:rgba(225,244,250,.15); --accent:#ff704d; --accent-ink:#fff;
+        --sky-top:#123b58; --sky-bottom:#2d7182; --horizon:#405d43; --ground:#283f2b;
+        --good:#5ed5b8; --bad:#ff7c72; --shadow:0 22px 70px rgba(0,0,0,.38);
+        --scene-text:#f0fbff; --cloud:rgba(235,249,255,.30); --runway:#1b272d;
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{min-height:100%;margin:0}
+    body{
+      background:var(--panel-2); color:var(--ink); font-family:Manrope,system-ui,sans-serif;
+      overflow-x:hidden; padding:clamp(10px,2vw,24px);
+    }
+    button,input{font:inherit}
+    button{color:inherit}
+    .app{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}
+    .game-shell{min-width:0;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;border-radius:24px}
+    .hud{height:74px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+    .metric{min-width:92px;padding-right:14px;border-right:1px solid var(--line)}
+    .metric:last-of-type{border-right:0}
+    .metric-label{display:block;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px}
+    .metric-value{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;line-height:1}
+    .metric-value small{font-size:11px;color:var(--muted)}
+    .hud-actions{margin-left:auto;display:flex;gap:7px}
+    .icon-btn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;cursor:pointer;transition:background .15s,transform .15s}
+    .icon-btn:hover{background:var(--panel);transform:translateY(-1px)}
+    .icon-btn:focus-visible,.primary:focus-visible,.difficulty button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
+    .icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .scene{position:relative;height:clamp(340px,56vh,610px);overflow:hidden;background:linear-gradient(var(--sky-top),var(--sky-bottom) 76%)}
+    .sun{position:absolute;right:9%;top:10%;width:66px;height:66px;border-radius:50%;background:#ffe073;box-shadow:0 0 0 14px rgba(255,224,115,.15)}
+    .cloud{position:absolute;width:130px;height:35px;border-radius:50px;background:var(--cloud);filter:blur(.2px);animation:drift 20s linear infinite}
+    .cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}
+    .cloud:before{width:50px;height:50px;left:22px;bottom:8px}.cloud:after{width:68px;height:58px;right:15px;bottom:6px}
+    .cloud.c1{top:20%;left:-150px;animation-duration:25s}.cloud.c2{top:48%;left:-180px;transform:scale(.62);animation-duration:18s;animation-delay:-9s}.cloud.c3{top:9%;left:-170px;transform:scale(.78);animation-duration:31s;animation-delay:-17s}
+    @keyframes drift{to{left:calc(100% + 180px)}}
+    .ground{position:absolute;left:0;right:0;bottom:0;height:16%;background:var(--ground);clip-path:polygon(0 36%,12% 20%,25% 40%,39% 14%,57% 44%,71% 17%,84% 34%,100% 10%,100% 100%,0 100%)}
+    .runway{position:absolute;left:39%;bottom:-2px;width:22%;height:17%;background:var(--runway);clip-path:polygon(38% 0,62% 0,100% 100%,0 100%)}
+    .runway:after{content:"";position:absolute;left:49%;top:16%;height:74%;width:2%;background:repeating-linear-gradient(to bottom,#fff 0 8px,transparent 8px 18px)}
+    .altitude-rail{position:absolute;left:14px;top:24px;bottom:50px;width:34px;display:flex;justify-content:center}
+    .altitude-rail:before{content:"";width:4px;border-radius:4px;background:rgba(255,255,255,.38)}
+    .alt-marker{position:absolute;left:2px;top:var(--marker,35%);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#17384a;box-shadow:0 3px 14px rgba(20,57,72,.22);transition:top .25s ease-out}
+    .alt-marker svg{width:16px;height:16px;fill:currentColor;transform:rotate(-12deg)}
+    .plane-wrap{position:absolute;left:15%;top:var(--plane-top,44%);width:min(23vw,235px);min-width:150px;filter:drop-shadow(0 16px 10px rgba(16,58,75,.20));transition:top .28s ease-out;animation:bob 2.4s ease-in-out infinite;z-index:3}
+    .plane-wrap.boost{animation:boost .34s ease-out}.plane-wrap.hit{animation:hit .26s linear}
+    .plane{width:100%;display:block;overflow:visible}
+    @keyframes bob{50%{transform:translateY(-5px) rotate(-1deg)}}
+    @keyframes boost{50%{transform:translateY(-17px) rotate(-5deg)}}
+    @keyframes hit{25%{transform:translate(-7px,5px) rotate(5deg)}75%{transform:translate(7px,2px) rotate(-4deg)}}
+    .propeller{transform-box:fill-box;transform-origin:center;animation:spin .16s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .word-card{position:absolute;left:50%;top:18%;transform:translateX(-50%);min-width:min(380px,70%);max-width:82%;padding:12px 18px 13px;text-align:center;background:rgba(255,255,255,.92);color:#132d39;border-radius:16px;box-shadow:0 10px 32px rgba(12,66,87,.16);z-index:5}
+    .word-card .prompt{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#55707b;margin-bottom:4px}
+    #word{font-family:'DM Mono',monospace;font-size:clamp(24px,4.4vw,44px);font-weight:500;letter-spacing:.035em;white-space:nowrap}
+    #word .done{color:var(--good)} #word .next{background:#ffe193;border-radius:4px;color:#172730} #word .rest{color:#71828a}
+    .message{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);font-weight:800;font-size:13px;color:var(--scene-text);background:color-mix(in srgb,var(--panel) 78%,transparent);padding:8px 13px;border-radius:999px;opacity:0;transition:opacity .15s,transform .15s;z-index:5;white-space:nowrap}
+    .message.show{opacity:1;transform:translate(-50%,-5px)}
+    .start-panel{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(9,35,47,.46);backdrop-filter:blur(5px);transition:opacity .2s}
+    .start-panel.hidden{opacity:0;pointer-events:none}
+    .start-box{width:min(480px,100%);background:var(--panel);color:var(--ink);padding:clamp(20px,4vw,32px);border-radius:22px;box-shadow:0 24px 80px rgba(5,22,30,.30)}
+    .start-box h1{font-size:clamp(30px,6vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0 0 10px}
+    .start-box p{margin:0 0 22px;color:var(--muted);line-height:1.5}
+    .difficulty{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel-2);padding:4px;border-radius:12px;margin:0 0 18px}
+    .difficulty button{border:0;background:transparent;padding:9px 6px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700}
+    .difficulty button.active{background:var(--panel);box-shadow:0 2px 8px rgba(12,38,50,.12)}
+    .primary{width:100%;border:0;border-radius:13px;padding:14px 18px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer;box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 28%,transparent)}
+    .key-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:10px}.key{font-family:'DM Mono',monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+    .controls{padding:16px;display:flex;gap:12px;align-items:center;background:var(--panel)}
+    .input-wrap{position:relative;flex:1}
+    #typeInput{width:100%;height:56px;border:2px solid var(--line);border-radius:14px;padding:0 17px;font-family:'DM Mono',monospace;font-size:20px;color:var(--ink);background:var(--panel-2);caret-color:var(--accent)}
+    #typeInput:focus{border-color:var(--accent);background:var(--panel)}
+    #typeInput.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}
+    #typeInput:disabled{opacity:.6;cursor:not-allowed}
+    .lift{width:130px}.lift-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:7px}
+    .lift-track{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}.lift-fill{height:100%;width:70%;border-radius:inherit;background:var(--good);transition:width .25s,background .25s}
+    .side{display:flex;flex-direction:column;gap:16px}
+    .side-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}
+    .side-card h2{font-size:15px;margin:0 0 14px;letter-spacing:-.01em}
+    .flight-log{display:grid;gap:11px}
+    .log-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px}
+    .log-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);width:30px;height:30px;border-radius:9px;background:var(--panel-2);display:grid;place-items:center}
+    .log-word{font-family:'DM Mono',monospace;font-size:13px;overflow:hidden;text-overflow:ellipsis}.log-time{font-size:11px;color:var(--muted)}
+    .empty-log{color:var(--muted);font-size:13px;line-height:1.45}
+    .tips{display:grid;gap:12px}.tip{display:flex;gap:11px;color:var(--muted);font-size:13px;line-height:1.4}.tip svg{flex:0 0 19px;width:19px;height:19px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .session-best{display:flex;align-items:end;justify-content:space-between}.session-best strong{font-family:'DM Mono',monospace;font-size:34px;line-height:1}.session-best span{font-size:11px;color:var(--muted);text-align:right}
+    @media (max-width:850px){
+      body{padding:0;background:var(--panel)}.app{display:block}.game-shell{border-radius:0;border:0;box-shadow:none}.side{display:none}.scene{height:calc(100dvh - 204px);min-height:350px;max-height:620px}.hud{height:70px}.metric{min-width:0;flex:1;padding-right:8px}.metric:nth-of-type(3){display:none}.metric-value{font-size:17px}.hud-actions{margin-left:0}.controls{min-height:82px;padding:12px}.lift{width:92px}.word-card{top:12%}.message{bottom:11%}
+    }
+    @media (max-width:520px){
+      .hud{padding:10px}.metric-label{font-size:9px}.metric-value{font-size:15px}.icon-btn{width:38px;height:38px}.scene{height:calc(100dvh - 186px);min-height:350px}.plane-wrap{left:13%;min-width:130px}.altitude-rail{left:7px}.word-card{min-width:72%;padding:10px 13px}.controls{padding:10px;gap:8px}.lift{width:74px}.lift-label span:first-child{display:none}#typeInput{height:50px;font-size:17px}.start-box{padding:22px 18px}.start-box h1{font-size:34px}
+    }
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="game-shell" aria-label="Typing flight game">
+      <header class="hud">
+        <div class="metric"><span class="metric-label">Speed</span><span class="metric-value"><b id="wpm">0</b> <small>WPM</small></span></div>
+        <div class="metric"><span class="metric-label">Accuracy</span><span class="metric-value"><b id="accuracy">100</b><small>%</small></span></div>
+        <div class="metric"><span class="metric-label">Distance</span><span class="metric-value"><b id="distance">0.0</b> <small>km</small></span></div>
+        <div class="metric"><span class="metric-label">Streak</span><span class="metric-value"><b id="streak">0</b><small>×</small></span></div>
+        <div class="hud-actions">
+          <button class="icon-btn" id="pauseBtn" aria-label="Pause flight" title="Pause" disabled>
+            <svg viewBox="0 0 24 24"><path id="pauseIcon" d="M8 5v14M16 5v14"/></svg>
+          </button>
+          <button class="icon-btn" id="restartBtn" aria-label="Restart flight" title="Restart">
+            <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="scene" id="scene">
+        <div class="sun" aria-hidden="true"></div>
+        <div class="cloud c1" aria-hidden="true"></div><div class="cloud c2" aria-hidden="true"></div><div class="cloud c3" aria-hidden="true"></div>
+        <div class="ground" aria-hidden="true"></div><div class="runway" aria-hidden="true"></div>
+        <div class="altitude-rail" aria-hidden="true"><span class="alt-marker" id="altMarker"><svg viewBox="0 0 24 24"><path d="M21.6 13.1 13.8 8V3.7c0-1-.8-2.2-1.8-2.2s-1.8 1.2-1.8 2.2V8l-7.8 5.1v2l7.8-2.5v4.7l-2.1 1.5v1.7l3.9-1 3.9 1v-1.7l-2.1-1.5v-4.7l7.8 2.5z"/></svg></span></div>
+
+        <div class="plane-wrap" id="plane" aria-label="Airplane in flight">
+          <svg class="plane" viewBox="0 0 300 136" role="img" aria-hidden="true">
+            <ellipse cx="150" cy="121" rx="99" ry="10" fill="rgba(15,46,59,.13)"/>
+            <g transform="translate(12 20)">
+              <path d="M58 59 18 40 7 45l29 27z" fill="#d5e2e6" stroke="#173745" stroke-width="3"/>
+              <path d="M54 64 26 92l14 4 38-29z" fill="#b8cbd1" stroke="#173745" stroke-width="3"/>
+              <path d="M45 43c34-14 145-14 192 8 18 8 20 23 0 29-50 16-149 13-192-2z" fill="#f5f8f8" stroke="#173745" stroke-width="4"/>
+              <path d="M114 50 87 6h23l61 44z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
+              <path d="m117 75-45 38h28l75-37z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
+              <path d="m222 48 26-27 10 2-8 37z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
+              <path d="M203 49c13 2 24 6 34 11-8 4-20 7-34 9z" fill="#9ed9e8" stroke="#173745" stroke-width="3"/>
+              <circle cx="70" cy="61" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/><circle cx="94" cy="58" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/>
+              <g class="propeller" transform="translate(23 61)"><path d="M0-29C8-29 8-7 2 0c7 8 6 29-2 29s-8-21-2-29c-6-7-6-29 2-29Z" fill="#173745"/><circle r="5" fill="#ffca56"/></g>
+            </g>
+          </svg>
+        </div>
+
+        <div class="word-card" aria-live="polite"><span class="prompt">Type to gain lift</span><div id="word">ready</div></div>
+        <div class="message" id="message" aria-live="polite">Smooth flying!</div>
+
+        <div class="start-panel" id="startPanel">
+          <div class="start-box">
+            <h1 id="panelTitle">Keep it airborne.</h1>
+            <p id="panelText">Type each word accurately to build lift. Hesitate too long and the plane loses altitude.</p>
+            <div class="difficulty" id="difficulty" aria-label="Select difficulty">
+              <button data-level="calm">Calm</button><button class="active" data-level="cruise">Cruise</button><button data-level="storm">Storm</button>
+            </div>
+            <button class="primary" id="startBtn">Start flight</button>
+            <div class="key-hint">or press <span class="key">Space</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="input-wrap"><input id="typeInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the word above…" aria-label="Type the displayed word" disabled /></div>
+        <div class="lift" aria-label="Lift remaining"><div class="lift-label"><span>Lift</span><span id="liftText">70%</span></div><div class="lift-track"><div class="lift-fill" id="liftFill"></div></div></div>
+      </div>
+    </section>
+
+    <aside class="side" aria-label="Flight details">
+      <section class="side-card">
+        <div class="session-best"><div><span class="metric-label">Session best</span><strong id="bestWpm">0</strong></div><span>words<br>per minute</span></div>
+      </section>
+      <section class="side-card">
+        <h2>Recent words</h2>
+        <div class="flight-log" id="flightLog"><p class="empty-log">Completed words will appear here during your flight.</p></div>
+      </section>
+      <section class="side-card">
+        <h2>Pilot briefing</h2>
+        <div class="tips">
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg><span>Correct words restore lift. Longer words give a bigger boost.</span></div>
+          <div class="tip"><svg viewBox="0 0 24 24"><path d="M4 12h16M15 7l5 5-5 5"/></svg><span>Look at the word, not your hands. Build a steady rhythm.</span></div>
+          <div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>The flight gets faster every five completed words.</span></div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    (function(){
+      const WORDS = {
+        calm:['sky','wing','blue','cloud','glide','pilot','smooth','level','route','clear','breeze','above','travel','focus','steady','bright','engine','airport','flight','control'],
+        cruise:['altitude','aircraft','compass','horizon','velocity','cockpit','runway','weather','journey','turbine','approach','heading','airborne','navigate','terminal','precision','rhythm','forward','balance','landing'],
+        storm:['aerodynamic','instruments','navigation','acceleration','visibility','crosswind','coordinates','communication','atmosphere','destination','concentration','thunderstorm','responsiveness','performance','determination','extraordinary']
+      };
+      const CONFIG={calm:{drain:3.0,boost:18},cruise:{drain:4.2,boost:15},storm:{drain:5.7,boost:12}};
+      const el=id=>document.getElementById(id);
+      const scene=el('scene'), plane=el('plane'), marker=el('altMarker'), input=el('typeInput'), wordEl=el('word'), liftFill=el('liftFill'), liftText=el('liftText');
+      let level='cruise', playing=false, paused=false, lift=70, word='', typed='', completed=0, correctChars=0, totalKeys=0, startTime=0, lastFrame=0, distance=0, streak=0, best=0, raf=0, recent=[];
+
+      function nextWord(){
+        const list=WORDS[level]; let candidate;
+        do{candidate=list[Math.floor(Math.random()*list.length)]}while(candidate===word && list.length>1);
+        word=candidate; typed=''; input.value=''; input.classList.remove('wrong'); renderWord();
+      }
+      function renderWord(){
+        if(!playing && word===''){wordEl.textContent='ready';return}
+        const ok=word.slice(0,typed.length)===typed;
+        if(!ok){wordEl.innerHTML='<span class="done">'+escapeHtml(word.slice(0,Math.max(0,typed.length-1)))+'</span><span class="next">'+escapeHtml(word[Math.max(0,typed.length-1)]||'')+'</span><span class="rest">'+escapeHtml(word.slice(typed.length))+'</span>';return}
+        const done=escapeHtml(word.slice(0,typed.length)); const next=escapeHtml(word[typed.length]||''); const rest=escapeHtml(word.slice(typed.length+1));
+        wordEl.innerHTML='<span class="done">'+done+'</span>'+(next?'<span class="next">'+next+'</span>':'')+'<span class="rest">'+rest+'</span>';
+      }
+      function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+      function setLift(v){
+        lift=Math.max(0,Math.min(100,v)); const pct=Math.round(lift); liftFill.style.width=pct+'%'; liftText.textContent=pct+'%';
+        liftFill.style.background=lift<25?'var(--bad)':lift<50?'#e59b24':'var(--good)';
+        const top=76-(lift*.55); scene.style.setProperty('--plane-top',top+'%'); scene.style.setProperty('--marker',(92-lift*.82)+'%');
+      }
+      function updateStats(){
+        const mins=Math.max((performance.now()-startTime)/60000,.05); const wpm=Math.round((correctChars/5)/mins); best=Math.max(best,wpm);
+        el('wpm').textContent=wpm; el('bestWpm').textContent=best; el('accuracy').textContent=totalKeys?Math.round(correctChars/totalKeys*100):100; el('distance').textContent=distance.toFixed(1); el('streak').textContent=streak;
+      }
+      function flash(text){const m=el('message');m.textContent=text;m.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>m.classList.remove('show'),900)}
+      function animate(now){
+        if(!playing||paused)return; if(!lastFrame)lastFrame=now; const dt=Math.min((now-lastFrame)/1000,.1);lastFrame=now;
+        const scaling=1+Math.floor(completed/5)*.09; setLift(lift-CONFIG[level].drain*scaling*dt); distance+=dt*(.045+completed*.0015); updateStats();
+        if(lift<=0){endGame()}else{raf=requestAnimationFrame(animate)}
+      }
+      function startGame(){
+        cancelAnimationFrame(raf); playing=true;paused=false;lift=70;completed=0;correctChars=0;totalKeys=0;distance=0;streak=0;recent=[];startTime=performance.now();lastFrame=0;
+        el('startPanel').classList.add('hidden');el('pauseBtn').disabled=false;input.disabled=false;el('pauseIcon').setAttribute('d','M8 5v14M16 5v14');renderLog();setLift(lift);updateStats();nextWord();input.focus();raf=requestAnimationFrame(animate);
+      }
+      function endGame(){
+        playing=false;paused=false;cancelAnimationFrame(raf);input.disabled=true;el('pauseBtn').disabled=true;plane.style.transform='translateY(165px) rotate(18deg)';
+        setTimeout(()=>{plane.style.transform='';el('panelTitle').textContent='Flight complete.';el('panelText').textContent='You covered '+distance.toFixed(1)+' km at '+el('wpm').textContent+' WPM with '+el('accuracy').textContent+'% accuracy.';el('startBtn').textContent='Fly again';el('difficulty').style.display='grid';el('startPanel').classList.remove('hidden')},500);
+      }
+      function togglePause(){
+        if(!playing)return;paused=!paused;input.disabled=paused;el('pauseIcon').setAttribute('d',paused?'M8 5l11 7-11 7z':'M8 5v14M16 5v14');
+        if(paused){cancelAnimationFrame(raf);el('panelTitle').textContent='Holding pattern.';el('panelText').textContent='The flight is paused. Take a breath, then continue when you are ready.';el('startBtn').textContent='Resume flight';el('difficulty').style.display='none';el('startPanel').classList.remove('hidden')}
+        else{el('startPanel').classList.add('hidden');lastFrame=performance.now();input.disabled=false;input.focus();raf=requestAnimationFrame(animate)}
+      }
+      function renderLog(){
+        const box=el('flightLog');if(!recent.length){box.innerHTML='<p class="empty-log">Completed words will appear here during your flight.</p>';return}
+        box.innerHTML=recent.map((r,i)=>'<div class="log-row"><span class="log-num">'+String(completed-i).padStart(2,'0')+'</span><span class="log-word">'+escapeHtml(r.word)+'</span><span class="log-time">'+r.time+'s</span></div>').join('');
+      }
+      input.addEventListener('input',function(e){
+        if(!playing||paused)return;const prev=typed;typed=input.value.toLowerCase().replace(/\s/g,'');
+        if(typed.length>prev.length){totalKeys+=typed.length-prev.length;if(word.slice(0,typed.length)===typed)correctChars+=typed.length-prev.length}
+        const valid=word.slice(0,typed.length)===typed;input.classList.toggle('wrong',!valid);
+        if(!valid){setLift(lift-1.8);streak=0;plane.classList.remove('hit');void plane.offsetWidth;plane.classList.add('hit')}
+        renderWord();updateStats();
+        if(typed===word){
+          completed++;streak++;const elapsed=((performance.now()-startTime)/1000).toFixed(1);recent.unshift({word:word,time:elapsed});recent=recent.slice(0,5);renderLog();
+          const bonus=CONFIG[level].boost+Math.min(word.length,10)*.7+Math.min(streak,5);setLift(lift+bonus);distance+=.12;plane.classList.remove('boost');void plane.offsetWidth;plane.classList.add('boost');flash(streak>=3?streak+' word streak!':'Lift +'+Math.round(bonus));nextWord();
+        }
+      });
+      document.querySelectorAll('#difficulty button').forEach(btn=>btn.addEventListener('click',function(){level=this.dataset.level;document.querySelectorAll('#difficulty button').forEach(b=>b.classList.toggle('active',b===this))}));
+      el('startBtn').addEventListener('click',()=>paused?togglePause():startGame());
+      el('pauseBtn').addEventListener('click',togglePause);
+      el('restartBtn').addEventListener('click',function(){paused=false;startGame()});
+      document.addEventListener('keydown',function(e){if(e.code==='Space'&&!playing&&!['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)){e.preventDefault();startGame()}if(e.key==='Escape'&&playing)togglePause()});
+      setLift(70);renderWord();
+    })();
+  </script>
+</body>
+</html>
