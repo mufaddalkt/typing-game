@@ -12,103 +12,56 @@
       color-scheme: light dark;
       --ink:#12202a; --muted:#4e6470; --panel:#ffffff; --panel-2:#edf4f6;
       --line:rgba(18,32,42,.14); --accent:#ff5b35; --accent-ink:#fff;
-      --sky-top:#79d8f4; --sky-bottom:#e9fbff; --horizon:#c7e58b; --ground:#89b45b;
-      --good:#087e68; --bad:#cf3f38; --shadow:0 18px 60px rgba(18,53,69,.17);
+      --sky-top:#79d8f4; --sky-bottom:#e9fbff; --ground:#89b45b;
+      --good:#087e68; --warning:#d07a06; --bad:#cf3f38; --shadow:0 18px 60px rgba(18,53,69,.17);
       --scene-text:#102d3a; --cloud:rgba(255,255,255,.82); --runway:#46565e;
     }
     @media (prefers-color-scheme: dark) {
       :root {
         --ink:#edf8fb; --muted:#a8bec7; --panel:#111d25; --panel-2:#192a34;
         --line:rgba(225,244,250,.15); --accent:#ff704d; --accent-ink:#fff;
-        --sky-top:#123b58; --sky-bottom:#2d7182; --horizon:#405d43; --ground:#283f2b;
-        --good:#5ed5b8; --bad:#ff7c72; --shadow:0 22px 70px rgba(0,0,0,.38);
+        --sky-top:#123b58; --sky-bottom:#2d7182; --ground:#283f2b;
+        --good:#5ed5b8; --warning:#ffc05c; --bad:#ff7c72; --shadow:0 22px 70px rgba(0,0,0,.38);
         --scene-text:#f0fbff; --cloud:rgba(235,249,255,.30); --runway:#1b272d;
       }
     }
     *{box-sizing:border-box}
     html,body{min-height:100%;margin:0}
-    body{
-      background:var(--panel-2); color:var(--ink); font-family:Manrope,system-ui,sans-serif;
-      overflow-x:hidden; padding:clamp(10px,2vw,24px);
-    }
-    button,input{font:inherit}
-    button{color:inherit}
+    body{background:var(--panel-2);color:var(--ink);font-family:Manrope,system-ui,sans-serif;overflow-x:hidden;padding:clamp(10px,2vw,24px)}
+    button,input{font:inherit} button{color:inherit}
     .app{width:min(1180px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}
     .game-shell{min-width:0;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;border-radius:24px}
-    .hud{height:74px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
-    .metric{min-width:92px;padding-right:14px;border-right:1px solid var(--line)}
-    .metric:last-of-type{border-right:0}
-    .metric-label{display:block;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:2px}
-    .metric-value{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;line-height:1}
-    .metric-value small{font-size:11px;color:var(--muted)}
-    .hud-actions{margin-left:auto;display:flex;gap:7px}
-    .icon-btn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;cursor:pointer;transition:background .15s,transform .15s}
-    .icon-btn:hover{background:var(--panel);transform:translateY(-1px)}
-    .icon-btn:focus-visible,.primary:focus-visible,.difficulty button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
-    .icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-    .scene{position:relative;height:clamp(340px,56vh,610px);overflow:hidden;background:linear-gradient(var(--sky-top),var(--sky-bottom) 76%)}
+    .hud{min-height:74px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+    .metric{min-width:88px;padding-right:13px;border-right:1px solid var(--line)}
+    .metric-label{display:block;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin-bottom:3px}
+    .metric-value{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;line-height:1}.metric-value small{font-size:11px;color:var(--muted)}
+    .tier{min-width:78px}.tier .metric-value{font-family:Manrope,system-ui,sans-serif;font-size:12px;font-weight:800;color:var(--good)}
+    .hud-actions{margin-left:auto;display:flex;gap:7px}.icon-btn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;cursor:pointer;transition:background .15s,transform .15s}.icon-btn:hover{background:var(--panel);transform:translateY(-1px)}
+    .icon-btn:focus-visible,.primary:focus-visible,.secondary:focus-visible,.difficulty button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}.icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .scene{position:relative;height:clamp(340px,56vh,610px);overflow:hidden;background:linear-gradient(var(--sky-top),var(--sky-bottom) 76%);isolation:isolate}
+    .scene:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;box-shadow:inset 0 0 0 rgba(207,63,56,0);transition:box-shadow .25s}
+    .scene.low-lift:after{box-shadow:inset 0 0 70px rgba(207,63,56,.48)}
+    .scene.shake{animation:screenShake .2s linear}
     .sun{position:absolute;right:9%;top:10%;width:66px;height:66px;border-radius:50%;background:#ffe073;box-shadow:0 0 0 14px rgba(255,224,115,.15)}
-    .cloud{position:absolute;width:130px;height:35px;border-radius:50px;background:var(--cloud);filter:blur(.2px);animation:drift 20s linear infinite}
-    .cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}
-    .cloud:before{width:50px;height:50px;left:22px;bottom:8px}.cloud:after{width:68px;height:58px;right:15px;bottom:6px}
-    .cloud.c1{top:20%;left:-150px;animation-duration:25s}.cloud.c2{top:48%;left:-180px;transform:scale(.62);animation-duration:18s;animation-delay:-9s}.cloud.c3{top:9%;left:-170px;transform:scale(.78);animation-duration:31s;animation-delay:-17s}
+    .cloud{position:absolute;width:130px;height:35px;border-radius:50px;background:var(--cloud);filter:blur(.2px);animation:drift 20s linear infinite}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud:before{width:50px;height:50px;left:22px;bottom:8px}.cloud:after{width:68px;height:58px;right:15px;bottom:6px}.cloud.c1{top:20%;left:-150px;animation-duration:25s}.cloud.c2{top:48%;left:-180px;transform:scale(.62);animation-duration:18s;animation-delay:-9s}.cloud.c3{top:9%;left:-170px;transform:scale(.78);animation-duration:31s;animation-delay:-17s}
     @keyframes drift{to{left:calc(100% + 180px)}}
     .ground{position:absolute;left:0;right:0;bottom:0;height:16%;background:var(--ground);clip-path:polygon(0 36%,12% 20%,25% 40%,39% 14%,57% 44%,71% 17%,84% 34%,100% 10%,100% 100%,0 100%)}
-    .runway{position:absolute;left:39%;bottom:-2px;width:22%;height:17%;background:var(--runway);clip-path:polygon(38% 0,62% 0,100% 100%,0 100%)}
-    .runway:after{content:"";position:absolute;left:49%;top:16%;height:74%;width:2%;background:repeating-linear-gradient(to bottom,#fff 0 8px,transparent 8px 18px)}
-    .altitude-rail{position:absolute;left:14px;top:24px;bottom:50px;width:34px;display:flex;justify-content:center}
-    .altitude-rail:before{content:"";width:4px;border-radius:4px;background:rgba(255,255,255,.38)}
-    .alt-marker{position:absolute;left:2px;top:var(--marker,35%);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#17384a;box-shadow:0 3px 14px rgba(20,57,72,.22);transition:top .25s ease-out}
-    .alt-marker svg{width:16px;height:16px;fill:currentColor;transform:rotate(-12deg)}
-    .plane-wrap{position:absolute;left:15%;top:var(--plane-top,44%);width:min(23vw,235px);min-width:150px;filter:drop-shadow(0 16px 10px rgba(16,58,75,.20));transition:top .28s ease-out;animation:bob 2.4s ease-in-out infinite;z-index:3}
-    .plane-wrap.boost{animation:boost .34s ease-out}.plane-wrap.hit{animation:hit .26s linear}
-    .plane{width:100%;display:block;overflow:visible}
-    @keyframes bob{50%{transform:translateY(-5px) rotate(-1deg)}}
-    @keyframes boost{50%{transform:translateY(-17px) rotate(-5deg)}}
-    @keyframes hit{25%{transform:translate(-7px,5px) rotate(5deg)}75%{transform:translate(7px,2px) rotate(-4deg)}}
-    .propeller{transform-box:fill-box;transform-origin:center;animation:spin .16s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .word-card{position:absolute;left:50%;top:18%;transform:translateX(-50%);min-width:min(380px,70%);max-width:82%;padding:12px 18px 13px;text-align:center;background:rgba(255,255,255,.92);color:#132d39;border-radius:16px;box-shadow:0 10px 32px rgba(12,66,87,.16);z-index:5}
-    .word-card .prompt{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#55707b;margin-bottom:4px}
-    #word{font-family:'DM Mono',monospace;font-size:clamp(24px,4.4vw,44px);font-weight:500;letter-spacing:.035em;white-space:nowrap}
-    #word .done{color:var(--good)} #word .next{background:#ffe193;border-radius:4px;color:#172730} #word .rest{color:#71828a}
-    .message{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);font-weight:800;font-size:13px;color:var(--scene-text);background:color-mix(in srgb,var(--panel) 78%,transparent);padding:8px 13px;border-radius:999px;opacity:0;transition:opacity .15s,transform .15s;z-index:5;white-space:nowrap}
-    .message.show{opacity:1;transform:translate(-50%,-5px)}
-    .start-panel{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(9,35,47,.46);backdrop-filter:blur(5px);transition:opacity .2s}
-    .start-panel.hidden{opacity:0;pointer-events:none}
-    .start-box{width:min(480px,100%);background:var(--panel);color:var(--ink);padding:clamp(20px,4vw,32px);border-radius:22px;box-shadow:0 24px 80px rgba(5,22,30,.30)}
-    .start-box h1{font-size:clamp(30px,6vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0 0 10px}
-    .start-box p{margin:0 0 22px;color:var(--muted);line-height:1.5}
-    .difficulty{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel-2);padding:4px;border-radius:12px;margin:0 0 18px}
-    .difficulty button{border:0;background:transparent;padding:9px 6px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700}
-    .difficulty button.active{background:var(--panel);box-shadow:0 2px 8px rgba(12,38,50,.12)}
-    .primary{width:100%;border:0;border-radius:13px;padding:14px 18px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer;box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 28%,transparent)}
-    .key-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:10px}.key{font-family:'DM Mono',monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
-    .controls{padding:16px;display:flex;gap:12px;align-items:center;background:var(--panel)}
-    .input-wrap{position:relative;flex:1}
-    #typeInput{width:100%;height:56px;border:2px solid var(--line);border-radius:14px;padding:0 17px;font-family:'DM Mono',monospace;font-size:20px;color:var(--ink);background:var(--panel-2);caret-color:var(--accent)}
-    #typeInput:focus{border-color:var(--accent);background:var(--panel)}
-    #typeInput.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}
-    #typeInput:disabled{opacity:.6;cursor:not-allowed}
-    .lift{width:130px}.lift-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:7px}
-    .lift-track{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}.lift-fill{height:100%;width:70%;border-radius:inherit;background:var(--good);transition:width .25s,background .25s}
-    .side{display:flex;flex-direction:column;gap:16px}
-    .side-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}
-    .side-card h2{font-size:15px;margin:0 0 14px;letter-spacing:-.01em}
-    .flight-log{display:grid;gap:11px}
-    .log-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px}
-    .log-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);width:30px;height:30px;border-radius:9px;background:var(--panel-2);display:grid;place-items:center}
-    .log-word{font-family:'DM Mono',monospace;font-size:13px;overflow:hidden;text-overflow:ellipsis}.log-time{font-size:11px;color:var(--muted)}
-    .empty-log{color:var(--muted);font-size:13px;line-height:1.45}
-    .tips{display:grid;gap:12px}.tip{display:flex;gap:11px;color:var(--muted);font-size:13px;line-height:1.4}.tip svg{flex:0 0 19px;width:19px;height:19px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-    .session-best{display:flex;align-items:end;justify-content:space-between}.session-best strong{font-family:'DM Mono',monospace;font-size:34px;line-height:1}.session-best span{font-size:11px;color:var(--muted);text-align:right}
-    @media (max-width:850px){
-      body{padding:0;background:var(--panel)}.app{display:block}.game-shell{border-radius:0;border:0;box-shadow:none}.side{display:none}.scene{height:calc(100dvh - 204px);min-height:350px;max-height:620px}.hud{height:70px}.metric{min-width:0;flex:1;padding-right:8px}.metric:nth-of-type(3){display:none}.metric-value{font-size:17px}.hud-actions{margin-left:0}.controls{min-height:82px;padding:12px}.lift{width:92px}.word-card{top:12%}.message{bottom:11%}
-    }
-    @media (max-width:520px){
-      .hud{padding:10px}.metric-label{font-size:9px}.metric-value{font-size:15px}.icon-btn{width:38px;height:38px}.scene{height:calc(100dvh - 186px);min-height:350px}.plane-wrap{left:13%;min-width:130px}.altitude-rail{left:7px}.word-card{min-width:72%;padding:10px 13px}.controls{padding:10px;gap:8px}.lift{width:74px}.lift-label span:first-child{display:none}#typeInput{height:50px;font-size:17px}.start-box{padding:22px 18px}.start-box h1{font-size:34px}
-    }
-    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+    .runway{position:absolute;left:39%;bottom:-2px;width:22%;height:17%;background:var(--runway);clip-path:polygon(38% 0,62% 0,100% 100%,0 100%)}.runway:after{content:"";position:absolute;left:49%;top:16%;height:74%;width:2%;background:repeating-linear-gradient(to bottom,#fff 0 8px,transparent 8px 18px)}
+    .altitude-rail{position:absolute;left:14px;top:24px;bottom:50px;width:34px;display:flex;justify-content:center}.altitude-rail:before{content:"";width:4px;border-radius:4px;background:rgba(255,255,255,.38)}.alt-marker{position:absolute;left:2px;top:var(--marker,35%);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#17384a;box-shadow:0 3px 14px rgba(20,57,72,.22);transition:top .25s ease-out}.alt-marker svg{width:16px;height:16px;fill:currentColor;transform:rotate(-12deg)}
+    .plane-wrap{position:absolute;left:15%;top:var(--plane-top,44%);width:min(23vw,235px);min-width:150px;filter:drop-shadow(0 16px 10px rgba(16,58,75,.20));transition:top .28s ease-out,transform .62s cubic-bezier(.5,0,.8,.3);animation:bob 2.4s ease-in-out infinite;z-index:3}.plane-wrap.boost{animation:boost .34s ease-out}.plane-wrap.hit{animation:hit .26s linear}.plane-wrap.crashed{animation:none!important;transform:translate(38vw,190px) rotate(29deg)!important}.plane-wrap.streaking{filter:drop-shadow(0 0 13px rgba(255,217,77,.88)) drop-shadow(0 16px 10px rgba(16,58,75,.20))}.plane{width:100%;display:block;overflow:visible}
+    @keyframes bob{50%{transform:translateY(-5px) rotate(-1deg)}}@keyframes boost{50%{transform:translateY(-17px) rotate(-5deg)}}@keyframes hit{25%{transform:translate(-7px,5px) rotate(5deg)}75%{transform:translate(7px,2px) rotate(-4deg)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes screenShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+    .propeller{transform-box:fill-box;transform-origin:center;animation:spin .16s linear infinite}.crashed .propeller{animation-play-state:paused}
+    .gain-popup{position:absolute;left:34%;top:var(--plane-top,44%);z-index:5;font-family:'DM Mono',monospace;font-weight:800;color:#056f5e;background:rgba(255,255,255,.92);padding:5px 8px;border-radius:8px;opacity:0;pointer-events:none}.gain-popup.pop{animation:gain .72s ease-out}@keyframes gain{0%{opacity:0;transform:translateY(18px) scale(.8)}30%{opacity:1}100%{opacity:0;transform:translateY(-26px) scale(1.08)}}
+    .word-card{position:absolute;left:50%;top:18%;transform:translateX(-50%);min-width:min(380px,70%);max-width:82%;padding:11px 18px 13px;text-align:center;background:rgba(255,255,255,.92);color:#132d39;border-radius:16px;box-shadow:0 10px 32px rgba(12,66,87,.16);z-index:5}.word-head{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}.word-card .prompt{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#55707b}.adaptive-badge{font-size:10px;font-weight:800;color:#086d5d;background:#d9f1eb;padding:2px 6px;border-radius:999px}#word{font-family:'DM Mono',monospace;font-size:clamp(24px,4.4vw,44px);font-weight:500;letter-spacing:.035em;white-space:nowrap}#word .done{color:var(--good)}#word .next{background:#ffe193;border-radius:4px;color:#172730}#word .rest{color:#71828a}
+    .message{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);font-weight:800;font-size:13px;color:var(--scene-text);background:color-mix(in srgb,var(--panel) 78%,transparent);padding:8px 13px;border-radius:999px;opacity:0;transition:opacity .15s,transform .15s;z-index:7;white-space:nowrap}.message.show{opacity:1;transform:translate(-50%,-5px)}
+    .pull-up{position:absolute;z-index:7;left:50%;top:7%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:clamp(20px,4vw,34px);font-weight:800;color:#fff;background:var(--bad);padding:7px 14px;border-radius:10px;opacity:0;pointer-events:none}.low-lift .pull-up{opacity:1;animation:warningPulse .7s ease-in-out infinite}@keyframes warningPulse{50%{transform:translateX(-50%) scale(1.08)}}
+    .countdown{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:rgba(9,35,47,.28);color:#fff;font-family:'DM Mono',monospace;font-size:clamp(86px,20vw,170px);font-weight:800;text-shadow:0 8px 25px rgba(0,0,0,.28);opacity:0;pointer-events:none}.countdown.show{opacity:1}.countdown small{position:absolute;bottom:20%;font-family:Manrope,system-ui,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+    .start-panel{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(9,35,47,.46);backdrop-filter:blur(5px);transition:opacity .2s}.start-panel.hidden{opacity:0;pointer-events:none}.start-box{width:min(500px,100%);background:var(--panel);color:var(--ink);padding:clamp(20px,4vw,32px);border-radius:22px;box-shadow:0 24px 80px rgba(5,22,30,.30)}.start-box h1{font-size:clamp(30px,6vw,46px);line-height:1.02;letter-spacing:-.045em;margin:0 0 10px}.start-box p{margin:0 0 18px;color:var(--muted);line-height:1.5}.summary-grid{display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 16px}.summary-grid.show{display:grid}.summary-stat{background:var(--panel-2);padding:10px;border-radius:11px}.summary-stat b{display:block;font-family:'DM Mono',monospace;font-size:20px}.summary-stat span{color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase}.best-banner{display:none;margin:-4px 0 14px;color:var(--good);font-weight:800}.best-banner.show{display:block}.difficulty{display:grid;grid-template-columns:repeat(3,1fr);background:var(--panel-2);padding:4px;border-radius:12px;margin:0 0 14px}.difficulty button{border:0;background:transparent;padding:9px 6px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700}.difficulty button.active{background:var(--panel);box-shadow:0 2px 8px rgba(12,38,50,.12)}.panel-actions{display:grid;gap:8px}.primary,.secondary{width:100%;border-radius:13px;padding:13px 18px;font-weight:800;cursor:pointer}.primary{border:0;background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 28%,transparent)}.secondary{display:none;border:1px solid var(--line);background:var(--panel-2)}.secondary.show{display:block}.key-hint{text-align:center;font-size:11px;color:var(--muted);margin-top:10px}.key{font-family:'DM Mono',monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+    .controls{padding:16px;display:flex;gap:12px;align-items:center;background:var(--panel)}.input-wrap{position:relative;flex:1}#typeInput{width:100%;height:56px;border:2px solid var(--line);border-radius:14px;padding:0 17px;font-family:'DM Mono',monospace;font-size:20px;color:var(--ink);background:var(--panel-2);caret-color:var(--accent)}#typeInput:focus{border-color:var(--accent);background:var(--panel)}#typeInput.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}#typeInput:disabled{opacity:.6;cursor:not-allowed}.lift{width:130px}.lift-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:7px}.lift-track{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}.lift-fill{height:100%;width:70%;border-radius:inherit;background:var(--good);transition:width .25s,background .25s}.low-lift+.controls .lift-fill,.lift-fill.danger{animation:liftPulse .62s ease-in-out infinite}@keyframes liftPulse{50%{opacity:.35}}
+    .side{display:flex;flex-direction:column;gap:16px}.side-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}.side-card h2{font-size:15px;margin:0 0 14px;letter-spacing:-.01em}.flight-log{display:grid;gap:11px}.log-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px}.log-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);width:30px;height:30px;border-radius:9px;background:var(--panel-2);display:grid;place-items:center}.log-word{font-family:'DM Mono',monospace;font-size:13px;overflow:hidden;text-overflow:ellipsis}.log-time{font-size:11px;color:var(--muted)}.empty-log{color:var(--muted);font-size:13px;line-height:1.45;margin:0}.tips{display:grid;gap:12px}.tip{display:flex;gap:11px;color:var(--muted);font-size:13px;line-height:1.4}.tip svg{flex:0 0 19px;width:19px;height:19px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.session-best{display:flex;align-items:end;justify-content:space-between}.session-best strong{font-family:'DM Mono',monospace;font-size:34px;line-height:1}.session-best span{font-size:11px;color:var(--muted);text-align:right}.level-bests{display:flex;gap:8px;margin-top:14px}.level-best{flex:1;background:var(--panel-2);padding:8px;border-radius:9px;text-align:center}.level-best b{display:block;font-family:'DM Mono',monospace}.level-best small{color:var(--muted);font-size:9px;text-transform:uppercase}.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.history-head h2{margin:0}.scope{font-size:10px;color:var(--muted)}.history-chart{height:64px;display:flex;align-items:end;gap:5px;border-bottom:1px solid var(--line);padding-top:4px}.history-bar{flex:1;min-width:5px;max-width:24px;background:var(--accent);border-radius:4px 4px 0 0;opacity:.78;position:relative}.history-bar:hover:after{content:attr(data-label);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);font-size:9px;padding:3px 5px;border-radius:4px;white-space:nowrap}
+    @media (max-width:850px){body{padding:0;background:var(--panel)}.app{display:block}.game-shell{border-radius:0;border:0;box-shadow:none}.side{display:none}.scene{height:calc(100dvh - 204px);min-height:350px;max-height:620px}.hud{min-height:70px}.metric{min-width:0;flex:1;padding-right:8px}.metric:nth-of-type(3){display:none}.metric-value{font-size:17px}.tier{flex:0 0 72px}.tier .metric-value{font-size:10px}.hud-actions{margin-left:0}.controls{min-height:82px;padding:12px}.lift{width:92px}.word-card{top:12%}.message{bottom:11%}}
+    @media (max-width:590px){.hud{padding:9px 8px;gap:6px}.metric-label{font-size:8px}.metric-value{font-size:14px}.metric:nth-of-type(4){display:none}.tier{flex:0 0 62px}.icon-btn{width:36px;height:36px;border-radius:10px}.scene{height:calc(100dvh - 180px);min-height:350px}.plane-wrap{left:12%;min-width:125px}.plane-wrap.crashed{transform:translate(48vw,190px) rotate(29deg)!important}.altitude-rail{left:7px}.word-card{min-width:76%;padding:9px 12px}.controls{padding:9px;gap:8px}.lift{width:72px}.lift-label span:first-child{display:none}#typeInput{height:48px;font-size:16px}.start-box{padding:20px 17px}.start-box h1{font-size:33px}.gain-popup{left:42%}}
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}.scene.shake{animation:none}.plane-wrap.crashed{transform:translateY(150px) rotate(20deg)!important}}
   </style>
 </head>
 <body>
@@ -119,154 +72,75 @@
         <div class="metric"><span class="metric-label">Accuracy</span><span class="metric-value"><b id="accuracy">100</b><small>%</small></span></div>
         <div class="metric"><span class="metric-label">Distance</span><span class="metric-value"><b id="distance">0.0</b> <small>km</small></span></div>
         <div class="metric"><span class="metric-label">Streak</span><span class="metric-value"><b id="streak">0</b><small>×</small></span></div>
+        <div class="metric tier"><span class="metric-label">Wind</span><span class="metric-value" id="tierHud">On pace</span></div>
         <div class="hud-actions">
-          <button class="icon-btn" id="pauseBtn" aria-label="Pause flight" title="Pause" disabled>
-            <svg viewBox="0 0 24 24"><path id="pauseIcon" d="M8 5v14M16 5v14"/></svg>
-          </button>
-          <button class="icon-btn" id="restartBtn" aria-label="Restart flight" title="Restart">
-            <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
-          </button>
+          <button class="icon-btn" id="muteBtn" aria-label="Mute sound" title="Mute sound"><svg viewBox="0 0 24 24"><path id="soundIcon" d="M11 5 6 9H3v6h3l5 4zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></svg></button>
+          <button class="icon-btn" id="pauseBtn" aria-label="Pause flight" title="Pause" disabled><svg viewBox="0 0 24 24"><path id="pauseIcon" d="M8 5v14M16 5v14"/></svg></button>
+          <button class="icon-btn" id="restartBtn" aria-label="Restart flight" title="Restart"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
         </div>
       </header>
-
       <div class="scene" id="scene">
-        <div class="sun" aria-hidden="true"></div>
-        <div class="cloud c1" aria-hidden="true"></div><div class="cloud c2" aria-hidden="true"></div><div class="cloud c3" aria-hidden="true"></div>
+        <div class="sun" aria-hidden="true"></div><div class="cloud c1" aria-hidden="true"></div><div class="cloud c2" aria-hidden="true"></div><div class="cloud c3" aria-hidden="true"></div>
         <div class="ground" aria-hidden="true"></div><div class="runway" aria-hidden="true"></div>
         <div class="altitude-rail" aria-hidden="true"><span class="alt-marker" id="altMarker"><svg viewBox="0 0 24 24"><path d="M21.6 13.1 13.8 8V3.7c0-1-.8-2.2-1.8-2.2s-1.8 1.2-1.8 2.2V8l-7.8 5.1v2l7.8-2.5v4.7l-2.1 1.5v1.7l3.9-1 3.9 1v-1.7l-2.1-1.5v-4.7l7.8 2.5z"/></svg></span></div>
-
-        <div class="plane-wrap" id="plane" aria-label="Airplane in flight">
-          <svg class="plane" viewBox="0 0 300 136" role="img" aria-hidden="true">
-            <ellipse cx="150" cy="121" rx="99" ry="10" fill="rgba(15,46,59,.13)"/>
-            <g transform="translate(12 20)">
-              <path d="M58 59 18 40 7 45l29 27z" fill="#d5e2e6" stroke="#173745" stroke-width="3"/>
-              <path d="M54 64 26 92l14 4 38-29z" fill="#b8cbd1" stroke="#173745" stroke-width="3"/>
-              <path d="M45 43c34-14 145-14 192 8 18 8 20 23 0 29-50 16-149 13-192-2z" fill="#f5f8f8" stroke="#173745" stroke-width="4"/>
-              <path d="M114 50 87 6h23l61 44z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
-              <path d="m117 75-45 38h28l75-37z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
-              <path d="m222 48 26-27 10 2-8 37z" fill="#ff6542" stroke="#173745" stroke-width="4"/>
-              <path d="M203 49c13 2 24 6 34 11-8 4-20 7-34 9z" fill="#9ed9e8" stroke="#173745" stroke-width="3"/>
-              <circle cx="70" cy="61" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/><circle cx="94" cy="58" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/>
-              <g class="propeller" transform="translate(23 61)"><path d="M0-29C8-29 8-7 2 0c7 8 6 29-2 29s-8-21-2-29c-6-7-6-29 2-29Z" fill="#173745"/><circle r="5" fill="#ffca56"/></g>
-            </g>
-          </svg>
-        </div>
-
-        <div class="word-card" aria-live="polite"><span class="prompt">Type to gain lift</span><div id="word">ready</div></div>
-        <div class="message" id="message" aria-live="polite">Smooth flying!</div>
-
-        <div class="start-panel" id="startPanel">
-          <div class="start-box">
-            <h1 id="panelTitle">Keep it airborne.</h1>
-            <p id="panelText">Type each word accurately to build lift. Hesitate too long and the plane loses altitude.</p>
-            <div class="difficulty" id="difficulty" aria-label="Select difficulty">
-              <button data-level="calm">Calm</button><button class="active" data-level="cruise">Cruise</button><button data-level="storm">Storm</button>
-            </div>
-            <button class="primary" id="startBtn">Start flight</button>
-            <div class="key-hint">or press <span class="key">Space</span></div>
-          </div>
-        </div>
+        <div class="plane-wrap" id="plane" aria-label="Airplane in flight"><svg class="plane" viewBox="0 0 300 136" role="img" aria-hidden="true"><ellipse cx="150" cy="121" rx="99" ry="10" fill="rgba(15,46,59,.13)"/><g transform="translate(12 20)"><path d="M58 59 18 40 7 45l29 27z" fill="#d5e2e6" stroke="#173745" stroke-width="3"/><path d="M54 64 26 92l14 4 38-29z" fill="#b8cbd1" stroke="#173745" stroke-width="3"/><path d="M45 43c34-14 145-14 192 8 18 8 20 23 0 29-50 16-149 13-192-2z" fill="#f5f8f8" stroke="#173745" stroke-width="4"/><path d="M114 50 87 6h23l61 44z" fill="#ff6542" stroke="#173745" stroke-width="4"/><path d="m117 75-45 38h28l75-37z" fill="#ff6542" stroke="#173745" stroke-width="4"/><path d="m222 48 26-27 10 2-8 37z" fill="#ff6542" stroke="#173745" stroke-width="4"/><path d="M203 49c13 2 24 6 34 11-8 4-20 7-34 9z" fill="#9ed9e8" stroke="#173745" stroke-width="3"/><circle cx="70" cy="61" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/><circle cx="94" cy="58" r="7" fill="#9ed9e8" stroke="#173745" stroke-width="3"/><g class="propeller" transform="translate(23 61)"><path d="M0-29C8-29 8-7 2 0c7 8 6 29-2 29s-8-21-2-29c-6-7-6-29 2-29Z" fill="#173745"/><circle r="5" fill="#ffca56"/></g></g></svg></div>
+        <div class="gain-popup" id="gainPopup" aria-hidden="true">+18</div>
+        <div class="word-card" aria-live="polite"><div class="word-head"><span class="prompt">Type to gain lift</span><span class="adaptive-badge" id="tierBadge">On pace</span></div><div id="word">ready</div></div>
+        <div class="pull-up" id="pullUp">PULL UP!</div><div class="message" id="message" aria-live="polite">Smooth flying!</div>
+        <div class="countdown" id="countdown" aria-live="assertive"><span id="countNumber">3</span><small>Press any key to skip</small></div>
+        <div class="start-panel" id="startPanel"><div class="start-box"><h1 id="panelTitle">Keep it airborne.</h1><p id="panelText">Type each word accurately to build lift. Hesitate too long and the plane loses altitude.</p><div class="summary-grid" id="summaryGrid"><div class="summary-stat"><b id="sumWpm">0</b><span>WPM</span></div><div class="summary-stat"><b id="sumAcc">100%</b><span>Accuracy</span></div><div class="summary-stat"><b id="sumDist">0.0 km</b><span>Distance</span></div></div><div class="best-banner" id="bestBanner">NEW BEST!</div><div class="difficulty" id="difficulty" aria-label="Select difficulty"><button data-level="calm">Calm</button><button class="active" data-level="cruise">Cruise</button><button data-level="storm">Storm</button></div><div class="panel-actions"><button class="primary" id="startBtn">Start flight</button><button class="secondary" id="drillBtn">Drill trouble words</button></div><div class="key-hint">or press <span class="key">Space</span></div></div></div>
       </div>
-
-      <div class="controls">
-        <div class="input-wrap"><input id="typeInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the word above…" aria-label="Type the displayed word" disabled /></div>
-        <div class="lift" aria-label="Lift remaining"><div class="lift-label"><span>Lift</span><span id="liftText">70%</span></div><div class="lift-track"><div class="lift-fill" id="liftFill"></div></div></div>
-      </div>
+      <div class="controls"><div class="input-wrap"><input id="typeInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the word above…" aria-label="Type the displayed word" disabled /></div><div class="lift" aria-label="Lift remaining"><div class="lift-label"><span>Lift</span><span id="liftText">70%</span></div><div class="lift-track"><div class="lift-fill" id="liftFill"></div></div></div></div>
     </section>
-
     <aside class="side" aria-label="Flight details">
-      <section class="side-card">
-        <div class="session-best"><div><span class="metric-label">Session best</span><strong id="bestWpm">0</strong></div><span>words<br>per minute</span></div>
-      </section>
-      <section class="side-card">
-        <h2>Recent words</h2>
-        <div class="flight-log" id="flightLog"><p class="empty-log">Completed words will appear here during your flight.</p></div>
-      </section>
-      <section class="side-card">
-        <h2>Pilot briefing</h2>
-        <div class="tips">
-          <div class="tip"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg><span>Correct words restore lift. Longer words give a bigger boost.</span></div>
-          <div class="tip"><svg viewBox="0 0 24 24"><path d="M4 12h16M15 7l5 5-5 5"/></svg><span>Look at the word, not your hands. Build a steady rhythm.</span></div>
-          <div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>The flight gets faster every five completed words.</span></div>
-        </div>
-      </section>
+      <section class="side-card"><div class="session-best"><div><span class="metric-label">Personal best</span><strong id="bestWpm">0</strong></div><span>this tab<br>WPM</span></div><div class="level-bests"><div class="level-best"><b id="bestCalm">0</b><small>Calm</small></div><div class="level-best"><b id="bestCruise">0</b><small>Cruise</small></div><div class="level-best"><b id="bestStorm">0</b><small>Storm</small></div></div></section>
+      <section class="side-card"><div class="history-head"><h2>Flight history</h2><span class="scope">this tab</span></div><div class="history-chart" id="historyChart"><p class="empty-log">Finish a flight to chart your WPM.</p></div></section>
+      <section class="side-card"><h2>Recent words</h2><div class="flight-log" id="flightLog"><p class="empty-log">Completed words will appear here during your flight.</p></div></section>
+      <section class="side-card"><h2>Pilot briefing</h2><div class="tips"><div class="tip"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg><span>Correct words restore lift. Longer words give a bigger boost.</span></div><div class="tip"><svg viewBox="0 0 24 24"><path d="M4 12h16M15 7l5 5-5 5"/></svg><span>Word length adapts to your latest pace.</span></div><div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Missed words return in a focused drill after landing.</span></div></div></section>
     </aside>
   </main>
-
   <script>
     (function(){
-      const WORDS = {
-        calm:['sky','wing','blue','cloud','glide','pilot','smooth','level','route','clear','breeze','above','travel','focus','steady','bright','engine','airport','flight','control'],
-        cruise:['altitude','aircraft','compass','horizon','velocity','cockpit','runway','weather','journey','turbine','approach','heading','airborne','navigate','terminal','precision','rhythm','forward','balance','landing'],
-        storm:['aerodynamic','instruments','navigation','acceleration','visibility','crosswind','coordinates','communication','atmosphere','destination','concentration','thunderstorm','responsiveness','performance','determination','extraordinary']
+      const WORDS={
+        calm:['air','aim','arc','bird','blue','calm','climb','cloud','coast','dash','dawn','drift','ease','field','float','fly','glide','green','gust','hangar','hill','hope','hover','joy','kite','lake','land','level','light','map','mile','north','open','pace','path','pilot','plane','quiet','radio','rise','route','safe','shore','signal','sky','soft','south','speed','star','steady','sun','taxi','trail','travel','trim','turn','view','warm','west','wind','wing','above','breeze','bright','clear','engine','focus','smooth'],
+        cruise:['airborne','airport','altitude','approach','balance','bearing','captain','ceiling','checkpoint','climbing','cockpit','compass','control','course','cruising','departure','distance','engineer','forward','frequency','gliding','heading','horizon','journey','landing','monitor','navigate','pattern','precision','pressure','radar','rhythm','route','runway','signal','speeding','stable','takeoff','terminal','throttle','tracking','traffic','turbine','velocity','weather','aircraft','airfield','airspeed','autopilot','clearance','coordinate','elevation','flightpath','formation','fueling','guidance','instrument','landmark','latitude','longitude','passenger','schedule','tailwind','taxiway','touchdown','visibility','waypoint','windsock'],
+        storm:['acceleration','aerodynamic','atmosphere','barometer','communication','concentration','coordinates','crosswind','destination','determination','extraordinary','headquarters','instrumentation','interference','meteorology','navigation','performance','pressurization','responsiveness','thunderstorm','turbulence','visibility','afterburner','airworthiness','automation','calibration','circulation','cloudburst','complication','deceleration','disorientation','emergency','evacuation','expedition','fluctuation','forecasting','gyroscope','hydraulic','identification','illumination','maneuvering','observation','orientation','precipitation','preparation','recalibrate','reconnaissance','stabilization','stormfront','trajectory','transmission','windshear','aeronautical','approaching','breakthrough','circumnavigate','configuration','contingency','electrical','headwind','microburst','operational','procedure','propulsion','situational','supervision','temperature','verification']
       };
-      const CONFIG={calm:{drain:3.0,boost:18},cruise:{drain:4.2,boost:15},storm:{drain:5.7,boost:12}};
-      const el=id=>document.getElementById(id);
-      const scene=el('scene'), plane=el('plane'), marker=el('altMarker'), input=el('typeInput'), wordEl=el('word'), liftFill=el('liftFill'), liftText=el('liftText');
-      let level='cruise', playing=false, paused=false, lift=70, word='', typed='', completed=0, correctChars=0, totalKeys=0, startTime=0, lastFrame=0, distance=0, streak=0, best=0, raf=0, recent=[];
-
-      function nextWord(){
-        const list=WORDS[level]; let candidate;
-        do{candidate=list[Math.floor(Math.random()*list.length)]}while(candidate===word && list.length>1);
-        word=candidate; typed=''; input.value=''; input.classList.remove('wrong'); renderWord();
-      }
-      function renderWord(){
-        if(!playing && word===''){wordEl.textContent='ready';return}
-        const ok=word.slice(0,typed.length)===typed;
-        if(!ok){wordEl.innerHTML='<span class="done">'+escapeHtml(word.slice(0,Math.max(0,typed.length-1)))+'</span><span class="next">'+escapeHtml(word[Math.max(0,typed.length-1)]||'')+'</span><span class="rest">'+escapeHtml(word.slice(typed.length))+'</span>';return}
-        const done=escapeHtml(word.slice(0,typed.length)); const next=escapeHtml(word[typed.length]||''); const rest=escapeHtml(word.slice(typed.length+1));
-        wordEl.innerHTML='<span class="done">'+done+'</span>'+(next?'<span class="next">'+next+'</span>':'')+'<span class="rest">'+rest+'</span>';
-      }
+      const CONFIG={calm:{drain:3,boost:18},cruise:{drain:4.2,boost:15},storm:{drain:5.7,boost:12}};
+      const el=id=>document.getElementById(id), scene=el('scene'),plane=el('plane'),input=el('typeInput'),wordEl=el('word'),liftFill=el('liftFill'),liftText=el('liftText');
+      let level='cruise',playing=false,paused=false,counting=false,lift=70,word='',typed='',completed=0,correctChars=0,totalKeys=0,startTime=0,lastFrame=0,distance=0,streak=0,raf=0,recent=[];
+      let pauseStarted=0,pausedTotal=0,wordStarted=0,wordPausedTotal=0,lastErrorDrain=0,lastWarnBeep=0,countTimer=0,muted=false,audioCtx=null,drillActive=false,drillWords=[],missedWords=new Set(),errorPositions={},rolling=[],sessionHistory=[],sessionBests={calm:0,cruise:0,storm:0},lastWord='';
+      const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
       function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-      function setLift(v){
-        lift=Math.max(0,Math.min(100,v)); const pct=Math.round(lift); liftFill.style.width=pct+'%'; liftText.textContent=pct+'%';
-        liftFill.style.background=lift<25?'var(--bad)':lift<50?'#e59b24':'var(--good)';
-        const top=76-(lift*.55); scene.style.setProperty('--plane-top',top+'%'); scene.style.setProperty('--marker',(92-lift*.82)+'%');
-      }
-      function updateStats(){
-        const mins=Math.max((performance.now()-startTime)/60000,.05); const wpm=Math.round((correctChars/5)/mins); best=Math.max(best,wpm);
-        el('wpm').textContent=wpm; el('bestWpm').textContent=best; el('accuracy').textContent=totalKeys?Math.round(correctChars/totalKeys*100):100; el('distance').textContent=distance.toFixed(1); el('streak').textContent=streak;
-      }
+      function audio(){if(muted)return null;try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}catch(e){return null}}
+      function tone(freq,duration,type,volume,delay){const ctx=audio();if(!ctx)return;const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+(delay||0);o.type=type||'sine';o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(volume||.03,t);g.gain.exponentialRampToValueAtTime(.0001,t+duration);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+duration)}
+      function sound(kind){if(kind==='tick')tone(520,.025,'sine',.018);if(kind==='error')tone(110,.09,'square',.025);if(kind==='warn')tone(310,.11,'triangle',.026);if(kind==='crash'){tone(70,.35,'sawtooth',.05);tone(45,.45,'triangle',.04,.04)}if(kind==='complete'){const f=600+Math.min(streak,8)*42;tone(f,.11,'sine',.04);tone(f*1.28,.16,'sine',.03,.07)}}
+      function activeElapsed(now){return startTime?Math.max(0,now-startTime-pausedTotal):0}
+      function rollingWpm(){if(!rolling.length)return 0;const chars=rolling.reduce((s,r)=>s+r.chars,0),ms=rolling.reduce((s,r)=>s+r.ms,0);return ms?Math.round((chars/5)/(ms/60000)):0}
+      function tier(){const w=rollingWpm();if(rolling.length<2)return{name:'On pace',min:0,max:99};if(w>=55)return{name:'Tailwind',min:8,max:99};if(w<=25)return{name:'Headwind',min:0,max:6};return{name:'On pace',min:5,max:10}}
+      function updateTier(){const t=tier();el('tierHud').textContent=t.name;el('tierBadge').textContent=t.name;el('tierHud').style.color=t.name==='Headwind'?'var(--warning)':'var(--good)'}
+      function chooseWord(){const t=tier(),source=drillActive&&drillWords.length?drillWords:WORDS[level];let pool=source.filter(w=>w.length>=t.min&&w.length<=t.max);if(!pool.length)pool=source;let candidate;do{candidate=pool[Math.floor(Math.random()*pool.length)]}while(candidate===lastWord&&pool.length>1);lastWord=candidate;return candidate}
+      function nextWord(){word=chooseWord();typed='';input.value='';input.classList.remove('wrong');wordStarted=performance.now();wordPausedTotal=0;renderWord();updateTier()}
+      function renderWord(){if(!playing&&word===''){wordEl.textContent='ready';return}const ok=word.slice(0,typed.length)===typed;if(!ok){const p=Math.max(0,typed.length-1);wordEl.innerHTML='<span class="done">'+escapeHtml(word.slice(0,p))+'</span><span class="next">'+escapeHtml(word[p]||'')+'</span><span class="rest">'+escapeHtml(word.slice(typed.length))+'</span>';return}const done=escapeHtml(word.slice(0,typed.length)),next=escapeHtml(word[typed.length]||''),rest=escapeHtml(word.slice(typed.length+1));wordEl.innerHTML='<span class="done">'+done+'</span>'+(next?'<span class="next">'+next+'</span>':'')+'<span class="rest">'+rest+'</span>'}
+      function setLift(v){const wasLow=lift<25;lift=Math.max(0,Math.min(100,v));const pct=Math.round(lift),isLow=lift<25;liftFill.style.width=pct+'%';liftText.textContent=pct+'%';liftFill.style.background=isLow?'var(--bad)':lift<50?'var(--warning)':'var(--good)';liftFill.classList.toggle('danger',isLow);scene.classList.toggle('low-lift',isLow);const top=76-(lift*.55);scene.style.setProperty('--plane-top',top+'%');scene.style.setProperty('--marker',(92-lift*.82)+'%');if(isLow&&!wasLow){flash('Altitude critical');sound('warn')}}
+      function updateStats(){const mins=Math.max(activeElapsed(performance.now())/60000,.002);const wpm=startTime?Math.round((correctChars/5)/mins):0;el('wpm').textContent=wpm;el('accuracy').textContent=totalKeys?Math.round(correctChars/totalKeys*100):100;el('distance').textContent=distance.toFixed(1);el('streak').textContent=streak;plane.classList.toggle('streaking',streak>=5)}
       function flash(text){const m=el('message');m.textContent=text;m.classList.add('show');clearTimeout(flash.t);flash.t=setTimeout(()=>m.classList.remove('show'),900)}
-      function animate(now){
-        if(!playing||paused)return; if(!lastFrame)lastFrame=now; const dt=Math.min((now-lastFrame)/1000,.1);lastFrame=now;
-        const scaling=1+Math.floor(completed/5)*.09; setLift(lift-CONFIG[level].drain*scaling*dt); distance+=dt*(.045+completed*.0015); updateStats();
-        if(lift<=0){endGame()}else{raf=requestAnimationFrame(animate)}
-      }
-      function startGame(){
-        cancelAnimationFrame(raf); playing=true;paused=false;lift=70;completed=0;correctChars=0;totalKeys=0;distance=0;streak=0;recent=[];startTime=performance.now();lastFrame=0;
-        el('startPanel').classList.add('hidden');el('pauseBtn').disabled=false;input.disabled=false;el('pauseIcon').setAttribute('d','M8 5v14M16 5v14');renderLog();setLift(lift);updateStats();nextWord();input.focus();raf=requestAnimationFrame(animate);
-      }
-      function endGame(){
-        playing=false;paused=false;cancelAnimationFrame(raf);input.disabled=true;el('pauseBtn').disabled=true;plane.style.transform='translateY(165px) rotate(18deg)';
-        setTimeout(()=>{plane.style.transform='';el('panelTitle').textContent='Flight complete.';el('panelText').textContent='You covered '+distance.toFixed(1)+' km at '+el('wpm').textContent+' WPM with '+el('accuracy').textContent+'% accuracy.';el('startBtn').textContent='Fly again';el('difficulty').style.display='grid';el('startPanel').classList.remove('hidden')},500);
-      }
-      function togglePause(){
-        if(!playing)return;paused=!paused;input.disabled=paused;el('pauseIcon').setAttribute('d',paused?'M8 5l11 7-11 7z':'M8 5v14M16 5v14');
-        if(paused){cancelAnimationFrame(raf);el('panelTitle').textContent='Holding pattern.';el('panelText').textContent='The flight is paused. Take a breath, then continue when you are ready.';el('startBtn').textContent='Resume flight';el('difficulty').style.display='none';el('startPanel').classList.remove('hidden')}
-        else{el('startPanel').classList.add('hidden');lastFrame=performance.now();input.disabled=false;input.focus();raf=requestAnimationFrame(animate)}
-      }
-      function renderLog(){
-        const box=el('flightLog');if(!recent.length){box.innerHTML='<p class="empty-log">Completed words will appear here during your flight.</p>';return}
-        box.innerHTML=recent.map((r,i)=>'<div class="log-row"><span class="log-num">'+String(completed-i).padStart(2,'0')+'</span><span class="log-word">'+escapeHtml(r.word)+'</span><span class="log-time">'+r.time+'s</span></div>').join('');
-      }
-      input.addEventListener('input',function(e){
-        if(!playing||paused)return;const prev=typed;typed=input.value.toLowerCase().replace(/\s/g,'');
-        if(typed.length>prev.length){totalKeys+=typed.length-prev.length;if(word.slice(0,typed.length)===typed)correctChars+=typed.length-prev.length}
-        const valid=word.slice(0,typed.length)===typed;input.classList.toggle('wrong',!valid);
-        if(!valid){setLift(lift-1.8);streak=0;plane.classList.remove('hit');void plane.offsetWidth;plane.classList.add('hit')}
-        renderWord();updateStats();
-        if(typed===word){
-          completed++;streak++;const elapsed=((performance.now()-startTime)/1000).toFixed(1);recent.unshift({word:word,time:elapsed});recent=recent.slice(0,5);renderLog();
-          const bonus=CONFIG[level].boost+Math.min(word.length,10)*.7+Math.min(streak,5);setLift(lift+bonus);distance+=.12;plane.classList.remove('boost');void plane.offsetWidth;plane.classList.add('boost');flash(streak>=3?streak+' word streak!':'Lift +'+Math.round(bonus));nextWord();
-        }
-      });
+      function gainPop(value){const p=el('gainPopup');p.textContent='+'+Math.round(value);p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop')}
+      function animate(now){if(!playing||paused||counting)return;if(!lastFrame)lastFrame=now;const dt=Math.min((now-lastFrame)/1000,.1);lastFrame=now;const scaling=1+Math.floor(completed/5)*.09;setLift(lift-CONFIG[level].drain*scaling*dt);distance+=dt*(.045+completed*.0015);updateStats();if(lift<25&&now-lastWarnBeep>1450){sound('warn');lastWarnBeep=now}if(lift<=0)endGame();else raf=requestAnimationFrame(animate)}
+      function resetRun(){cancelAnimationFrame(raf);clearInterval(countTimer);playing=true;paused=false;counting=true;lift=70;word='';typed='';completed=0;correctChars=0;totalKeys=0;distance=0;streak=0;recent=[];rolling=[];missedWords=new Set();errorPositions={};startTime=0;lastFrame=0;pauseStarted=0;pausedTotal=0;wordStarted=0;wordPausedTotal=0;lastErrorDrain=0;lastWarnBeep=0;plane.className='plane-wrap';scene.classList.remove('low-lift','shake');el('startPanel').classList.add('hidden');el('summaryGrid').classList.remove('show');el('bestBanner').classList.remove('show');el('drillBtn').classList.remove('show');el('pauseBtn').disabled=true;input.disabled=true;el('pauseIcon').setAttribute('d','M8 5v14M16 5v14');renderLog();setLift(70);updateStats();runCountdown()}
+      function runCountdown(){const overlay=el('countdown'),num=el('countNumber');let n=3;num.textContent=n;overlay.classList.add('show');countTimer=setInterval(()=>{n--;if(n>0){num.textContent=n;sound('tick')}else beginFlight()},700)}
+      function beginFlight(){if(!counting)return;clearInterval(countTimer);counting=false;el('countdown').classList.remove('show');el('pauseBtn').disabled=false;input.disabled=false;nextWord();input.focus();lastFrame=performance.now();raf=requestAnimationFrame(animate)}
+      function startGame(isDrill){drillActive=!!isDrill;if(drillActive&&!drillWords.length)return;resetRun()}
+      function endGame(){if(!playing)return;playing=false;paused=false;counting=false;cancelAnimationFrame(raf);clearInterval(countTimer);input.disabled=true;el('pauseBtn').disabled=true;plane.classList.remove('boost','hit');plane.classList.add('crashed');sound('crash');updateStats();const wpm=Number(el('wpm').textContent),acc=Number(el('accuracy').textContent);const prior=Math.max(...Object.values(sessionBests));const newBest=wpm>prior;sessionBests[level]=Math.max(sessionBests[level],wpm);sessionHistory.push({wpm:wpm,accuracy:acc,distance:Number(distance.toFixed(1)),level:level,date:new Date()});sessionHistory=sessionHistory.slice(-10);drillWords=Array.from(missedWords);renderProgress();setTimeout(()=>{el('panelTitle').textContent=drillActive?'Drill complete.':'Flight complete.';el('panelText').textContent=drillWords.length?'Review the words that caused turbulence, or take off again.':'Clean flying. No trouble words this round.';el('sumWpm').textContent=wpm;el('sumAcc').textContent=acc+'%';el('sumDist').textContent=distance.toFixed(1)+' km';el('summaryGrid').classList.add('show');el('bestBanner').classList.toggle('show',newBest);el('startBtn').textContent='Fly again';el('difficulty').style.display='grid';el('drillBtn').textContent='Drill trouble words ('+drillWords.length+')';el('drillBtn').classList.toggle('show',drillWords.length>0);el('startPanel').classList.remove('hidden')},620)}
+      function togglePause(auto){if(!playing||counting)return;paused=!paused;input.disabled=paused;el('pauseIcon').setAttribute('d',paused?'M8 5l11 7-11 7z':'M8 5v14M16 5v14');if(paused){pauseStarted=performance.now();cancelAnimationFrame(raf);el('panelTitle').textContent=auto?'Auto-paused.':'Holding pattern.';el('panelText').textContent=auto?'The flight paused when this tab lost focus. Resume when ready.':'Take a breath, then continue when you are ready.';el('startBtn').textContent='Resume flight';el('difficulty').style.display='none';el('summaryGrid').classList.remove('show');el('bestBanner').classList.remove('show');el('drillBtn').classList.remove('show');el('startPanel').classList.remove('hidden')}else{const gap=performance.now()-pauseStarted;pausedTotal+=gap;wordPausedTotal+=gap;el('startPanel').classList.add('hidden');lastFrame=performance.now();input.disabled=false;input.focus();raf=requestAnimationFrame(animate)}}
+      function renderLog(){const box=el('flightLog');if(!recent.length){box.innerHTML='<p class="empty-log">Completed words will appear here during your flight.</p>';return}box.innerHTML=recent.map(r=>'<div class="log-row"><span class="log-num">'+String(r.num).padStart(2,'0')+'</span><span class="log-word">'+escapeHtml(r.word)+'</span><span class="log-time">'+r.time+'s</span></div>').join('')}
+      function renderProgress(){const overall=Math.max(0,...Object.values(sessionBests));el('bestWpm').textContent=overall;el('bestCalm').textContent=sessionBests.calm;el('bestCruise').textContent=sessionBests.cruise;el('bestStorm').textContent=sessionBests.storm;const box=el('historyChart');if(!sessionHistory.length){box.innerHTML='<p class="empty-log">Finish a flight to chart your WPM.</p>';return}const max=Math.max(10,...sessionHistory.map(h=>h.wpm));box.innerHTML=sessionHistory.map(h=>'<span class="history-bar" style="height:'+Math.max(8,Math.round(h.wpm/max*100))+'%" data-label="'+h.wpm+' WPM · '+h.level+'" aria-label="'+h.wpm+' WPM on '+h.level+'"></span>').join('')}
+      input.addEventListener('input',function(e){if(!playing||paused||counting)return;const now=performance.now();if(!startTime){startTime=now;wordStarted=now}const prev=typed;typed=input.value.toLowerCase().replace(/\s/g,'');if(typed.length>prev.length){const added=typed.length-prev.length;totalKeys+=added;if(word.slice(0,typed.length)===typed){correctChars+=added;sound('tick')}else{const pos=Math.max(0,typed.length-1);missedWords.add(word);errorPositions[word]=errorPositions[word]||{};errorPositions[word][pos]=(errorPositions[word][pos]||0)+1}}const valid=word.slice(0,typed.length)===typed;input.classList.toggle('wrong',!valid);if(!valid){streak=0;if(now-lastErrorDrain>180){setLift(lift-1.8);lastErrorDrain=now;sound('error')}if(!reduceMotion){plane.classList.remove('hit');scene.classList.remove('shake');void plane.offsetWidth;plane.classList.add('hit');scene.classList.add('shake');setTimeout(()=>scene.classList.remove('shake'),220)}}renderWord();updateStats();if(typed===word){completed++;streak++;const duration=Math.max(120,now-wordStarted-wordPausedTotal),seconds=(duration/1000).toFixed(1);rolling.push({chars:word.length,ms:duration});rolling=rolling.slice(-10);recent.unshift({word:word,time:seconds,num:completed});recent=recent.slice(0,5);renderLog();const bonus=CONFIG[level].boost+Math.min(word.length,10)*.7+Math.min(streak,5);setLift(lift+bonus);distance+=.12;sound('complete');gainPop(bonus);plane.classList.remove('boost');void plane.offsetWidth;plane.classList.add('boost');if(streak>=5)flash(streak+' word streak!');nextWord()}});
       document.querySelectorAll('#difficulty button').forEach(btn=>btn.addEventListener('click',function(){level=this.dataset.level;document.querySelectorAll('#difficulty button').forEach(b=>b.classList.toggle('active',b===this))}));
-      el('startBtn').addEventListener('click',()=>paused?togglePause():startGame());
-      el('pauseBtn').addEventListener('click',togglePause);
-      el('restartBtn').addEventListener('click',function(){paused=false;startGame()});
-      document.addEventListener('keydown',function(e){if(e.code==='Space'&&!playing&&!['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)){e.preventDefault();startGame()}if(e.key==='Escape'&&playing)togglePause()});
-      setLift(70);renderWord();
+      el('startBtn').addEventListener('click',()=>paused?togglePause(false):startGame(false));el('drillBtn').addEventListener('click',()=>startGame(true));el('pauseBtn').addEventListener('click',()=>togglePause(false));el('restartBtn').addEventListener('click',()=>startGame(drillActive));el('muteBtn').addEventListener('click',function(){muted=!muted;this.setAttribute('aria-label',muted?'Unmute sound':'Mute sound');this.title=muted?'Unmute sound':'Mute sound';el('soundIcon').setAttribute('d',muted?'M11 5 6 9H3v6h3l5 4zM16 9l5 6M21 9l-5 6':'M11 5 6 9H3v6h3l5 4zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12')});
+      document.addEventListener('keydown',function(e){if(counting){e.preventDefault();beginFlight();return}if(e.code==='Space'&&!playing&&!['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)){e.preventDefault();startGame(false)}if(e.key==='Escape'&&playing)togglePause(false)});
+      document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused&&!counting)togglePause(true)});window.addEventListener('blur',()=>{if(playing&&!paused&&!counting)togglePause(true)});
+      setLift(70);renderWord();renderProgress();
     })();
   </script>
 </body>
